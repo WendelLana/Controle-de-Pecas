@@ -1,19 +1,36 @@
-import java.util.Set;
-import java.rmi.*;
+import java.rmi.server.UnicastRemoteObject;
+import java.rmi.RemoteException;
+import java.util.HashSet;
+import java.util.HashMap;
 
-public class PartRepository extends java.rmi.server.UnicastRemoteObject implements InterfacePartRepository {
-    public Set<Part> repository;
+public class PartRepository extends UnicastRemoteObject implements InterfacePartRepository {
+    private HashSet<Part> repository;
+    private String repositoryName;
     
-    public PartRepository() throws RemoteException {
-        this.repository = new Set<Part>();
+    public PartRepository(String name) throws RemoteException {
+        this.repository = new HashSet<Part>();
+        this.repositoryName = name;
+    }
+
+    public String getRepositoryName() {
+        return repositoryName;
+    }
+
+    public int countRepositoryParts() {
+        return repository.size();
     }
 
     public void addPart(String name, String desc, HashMap<Part, Integer> subcomponents) throws RemoteException {
-        Part newPart = new Part(name, desc, subcomponents);
+        Part newPart = new Part(name, desc, subcomponents, repositoryName);
         repository.add(newPart);
     }
 
-    public Set<Part> listParts() throws RemoteException {
+    public HashSet<Part> listParts() throws RemoteException {
+        System.out.println("Peças contidas no repositório "+ repositoryName);
+        System.out.printf("\n%6s %15s %20s", "Código", "Nome", "Descrição");
+        for (Part part : repository) {
+            System.out.printf("\n%6s %15s %20s", part.getCode(), part.getName(), part.getDescription());
+        }
         return repository;
     }
 

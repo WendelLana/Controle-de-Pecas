@@ -1,16 +1,18 @@
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Part {
     private static final AtomicInteger count = new AtomicInteger(0);
-    public int code;
-    public String name, description;
-    public HashMap<Part, Integer> subcomponents;
+    private int code;
+    private String name, description, repositoryName;
+    private HashMap<Part, Integer> subcomponents;
 
-    public Part (String name, String desc, HashMap subcomponents) {
+    public Part (String name, String desc, HashMap subcomponents, String repName) {
         this.code = count.incrementAndGet();
         this.name = name;
         this.description = desc;
         this.subcomponents = subcomponents;
+        this.repositoryName = repName;
     }
 
     public int getCode() {
@@ -37,6 +39,10 @@ public class Part {
         this.description = desc;
     }
 
+    public String getRepositoryName() {
+        return repositoryName;
+    }
+
     public HashMap<Part, Integer> getSubcomponents() {
         return subcomponents;
     }
@@ -45,7 +51,7 @@ public class Part {
         subcomponents.put(subPart, quant);
     }
 
-    public void clearSubcomponents() {
-        subcomponents.clear();
+    public boolean isPrimitive() {
+        return subcomponents.isEmpty();
     }
 }

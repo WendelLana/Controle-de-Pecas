@@ -1,18 +1,18 @@
 import java.rmi.Naming;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Server {
-    private static final AtomicInteger count = new AtomicInteger(0);
+    //private static final AtomicInteger count = new AtomicInteger(0);
 
-    public Server () {
+    public Server (String name) {
+        System.out.println("Iniciando servidor "+ name);
         try {
-            InterfacePartRepository obj = new PartRepository();
-            Naming.rebind("//localhost/repository"+ count.incrementAndGet(), obj);
+            InterfacePartRepository obj = new PartRepository(name);
+            Naming.rebind("//localhost/"+ name, obj);
         } catch (Exception e) {
             System.out.print("Erro: "+ e);
         }
     }
     public static void main(String[] args) {
-        new Server();
+        new Server(args[0]);
     }
 }

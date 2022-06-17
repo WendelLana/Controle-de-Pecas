@@ -26,11 +26,6 @@ public class PartRepository extends UnicastRemoteObject implements InterfacePart
     }
 
     public HashSet<InterfacePart> listParts() throws RemoteException {
-        System.out.println("Peças contidas no repositório "+ repositoryName);
-        System.out.printf("\n%6s %15s %20s", "Código", "Nome", "Descrição");
-        for (InterfacePart part : repository) {
-            System.out.printf("\n%6s %15s %20s", part.getCode(), part.getName(), part.getDescription());
-        }
         return repository;
     }
 

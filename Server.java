@@ -1,4 +1,5 @@
 import java.rmi.Naming;
+import java.rmi.registry.LocateRegistry;
 
 public class Server {
     //private static final AtomicInteger count = new AtomicInteger(0);
@@ -6,8 +7,9 @@ public class Server {
     public Server (String name) {
         System.out.println("Iniciando servidor "+ name);
         try {
+            LocateRegistry.createRegistry(25565);
             InterfacePartRepository obj = new PartRepository(name);
-            Naming.rebind("//localhost/"+ name, obj);
+            Naming.rebind("//localhost:25565/"+ name, obj);
         } catch (Exception e) {
             System.out.print("Erro: "+ e);
         }

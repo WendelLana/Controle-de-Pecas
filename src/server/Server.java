@@ -15,7 +15,7 @@ public class Server {
             InterfacePartRepository obj = new PartRepository(name);
             Naming.rebind("//localhost:25565/"+ name, obj);
         } catch (Exception e) {
-            System.out.print("Erro: "+ e);
+            System.out.println("Erro: "+ e);
         }
     }
     public static void main(String[] args) {

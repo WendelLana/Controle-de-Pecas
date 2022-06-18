@@ -149,9 +149,9 @@ public class Client {
                 } else {
                     System.out.println("Primitiva: Nao");
                     System.out.println("Lista de subcomponentes: ");
-                    System.out.printf("\n%-25s %-6s %-15s", "Nome", "Quant.", "Repositorio");
+                    System.out.printf("\n%-6s %-25s %-6s %-15s", "Cod.", "Nome", "Quant.", "Repositorio");
                     for (Map.Entry<InterfacePart, Integer> subcomponent : part.getSubComponents().entrySet()) {
-                        System.out.printf("\n%-25s %-6s %-15s", subcomponent.getKey().getName(), subcomponent.getValue(), subcomponent.getKey().getRepositoryName());
+                        System.out.printf("\n%-25s %-6s %-15s", subcomponent.getKey().getCode(), subcomponent.getKey().getName(), subcomponent.getValue(), subcomponent.getKey().getRepositoryName());
                     }
                     System.out.println("\nTotal: " + part.getTotalSubComponents());
                 }

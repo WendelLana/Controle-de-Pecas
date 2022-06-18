@@ -3,22 +3,23 @@ package server;
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 
-import interfaces.*;
-
 public class Server {
-    //private static final AtomicInteger count = new AtomicInteger(0);
+    //private static Registry registry;
 
-    public Server (String name) {
-        System.out.println("Iniciando servidor "+ name);
+    public Server (String name, String strPort) {
+        System.out.println("Iniciando servidor "+ name +"...");
         try {
-            LocateRegistry.createRegistry(25565);
-            InterfacePartRepository obj = new PartRepository(name);
-            Naming.rebind("//localhost:25565/"+ name, obj);
+            int port = Integer.parseInt(strPort);
+            LocateRegistry.createRegistry(port);
+            PartRepository obj = new PartRepository(name);
+            Naming.rebind("//localhost:"+ port +"/"+ name, obj);
+            System.out.println("Servidor iniciado e rodando!");
         } catch (Exception e) {
-            System.out.println("Erro: "+ e);
+            System.out.print("Erro: "+ e);
         }
     }
     public static void main(String[] args) {
-        new Server(args[0]);
+        new Server(args[0], args[1]);
     }
 }
+

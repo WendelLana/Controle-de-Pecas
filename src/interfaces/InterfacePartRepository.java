@@ -8,7 +8,7 @@ import java.util.HashMap;
 public interface InterfacePartRepository extends Remote {
     public String getRepositoryName() throws RemoteException;
     public int countRepositoryParts() throws RemoteException;
-    public void addPart(String name, String desc, HashMap<InterfacePart, Integer> subcomponents) throws RemoteException;
+    public void addPart(int code, String name, String desc, HashMap<InterfacePart, Integer> subcomponents) throws RemoteException;
     public HashSet<InterfacePart> listParts() throws RemoteException;
     public InterfacePart getPart(int code) throws RemoteException;
 }

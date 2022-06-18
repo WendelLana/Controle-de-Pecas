@@ -24,8 +24,8 @@ public class PartRepository extends UnicastRemoteObject implements InterfacePart
         return repository.size();
     }
 
-    public void addPart(String name, String desc, HashMap<InterfacePart, Integer> subcomponents) throws RemoteException {
-        InterfacePart newPart = new Part(name, desc, subcomponents, repositoryName);
+    public void addPart(int code, String name, String desc, HashMap<InterfacePart, Integer> subcomponents) throws RemoteException {        
+        InterfacePart newPart = new Part(code, name, desc, subcomponents, repositoryName);
         repository.add(newPart);
     }
 

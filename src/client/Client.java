@@ -1,5 +1,6 @@
 package client;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.io.Console;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
@@ -12,6 +13,7 @@ import java.util.HashSet;
 import interfaces.*;
 
 public class Client {
+    private static final AtomicInteger count = new AtomicInteger(0);
     public InterfacePartRepository currentRepository;
     public InterfacePart currentPart;
     public HashMap<InterfacePart, Integer> subcomponents;
@@ -27,16 +29,16 @@ public class Client {
         try {
             do {
                 System.out.println("### Menu do Gerenciador de Pecas ###");
-                System.out.println(" =========================");
-                System.out.println("   |   1 - Abrir repositorio      |");
-                System.out.println("   |   2 - Listar pecas           |");
-                System.out.println("   |   3 - Buscar por peca        |");
-                System.out.println("   |   4 - Mostrar peca           |");
-                System.out.println("   |   5 - Limpar lista subpecas  |");
-                System.out.println("   |   6 - Adicionar peca a lista |");
-                System.out.println("   |   7 - Adicionar peca ao repo |");
-                System.out.println("   |   0 - Sair                   |");
-                System.out.println(" =========================");
+                System.out.println("     ================================");
+                System.out.println("   |   1 - Abrir/Mudar de repositorio |");
+                System.out.println("   |   2 - Criar peca no repositorio  |");
+                System.out.println("   |   3 - Lista pecas do repositorio |");
+                System.out.println("   |   4 - Buscar peca por codigo     |");
+                System.out.println("   |   5 - Detalhes da peca atual     |");
+                System.out.println("   |   6 - Adicionar peca na lista    |");
+                System.out.println("   |   7 - Limpar a lista de subpecas |");
+                System.out.println("   |   0 - Finalizar aplicacao        |");
+                System.out.println("     ================================");
                 if (currentRepository != null) {
                     System.out.println("Repositorio atual: " + currentRepository.getRepositoryName());
                 }
@@ -44,22 +46,45 @@ public class Client {
                 opt = Integer.parseInt(scan.readLine());
                 switch (opt) {
                     case 1:
+                        System.out.println("Escreva o endereco IP do repositorio (padrao: localhost): ");
+                        String repHost = scan.readLine();
+                        System.out.println("Escreva a porta do repositorio: ");
+                        String repPort = scan.readLine();
                         System.out.println("Escreva o nome do repositorio: ");
                         String repName = scan.readLine();
-                        currentRepository = (InterfacePartRepository) Naming.lookup("//localhost:25565/" + repName);
+                        if (repHost.isBlank()) {
+                            currentRepository = (InterfacePartRepository) Naming
+                                    .lookup("//localhost:" + repPort + "/" + repName);
+                        } else {
+                            currentRepository = (InterfacePartRepository) Naming
+                                    .lookup("//" + repHost + ":" + repPort + "/" + repName);
+                        }
                         break;
                     case 2:
                         if (currentRepository == null) {
                             System.out.println("Nenhum repositorio foi aberto");
                             break;
                         }
-                        System.out.printf("\n%-6s %-15s %-20s", "Codigo", "Nome", "Descricao");
-                        for (InterfacePart part : currentRepository.listParts()) {
-                            System.out.printf("\n%-6s %-15s %-20s", part.getCode(), part.getName(), part.getDescription());
-                        }
-                        System.out.println("\nTotal: "+ currentRepository.countRepositoryParts());
+                        int partCode = count.incrementAndGet();
+                        System.out.println("Coloque o nome da peca: ");
+                        String partName = scan.readLine();
+                        System.out.println("Coloque uma descricao da peca: ");
+                        String partDesc = scan.readLine();
+                        currentRepository.addPart(partCode, partName, partDesc, subcomponents);
                         break;
                     case 3:
+                        if (currentRepository == null) {
+                            System.out.println("Nenhum repositorio foi aberto");
+                            break;
+                        }
+                        System.out.printf("\n%-6s %-15s %-20s", "Codigo", "Nome", "Descricao");
+                        for (InterfacePart part : currentRepository.listParts()) {
+                            System.out.printf("\n%-6s %-15s %-20s", part.getCode(), part.getName(),
+                                    part.getDescription());
+                        }
+                        System.out.println("\nTotal: " + currentRepository.countRepositoryParts());
+                        break;
+                    case 4:
                         if (currentRepository == null) {
                             System.out.println("Nenhum repositorio foi aberto");
                             break;
@@ -67,50 +92,33 @@ public class Client {
                         System.out.println("Digite o codigo da peca que deseja buscar: ");
                         int code = Integer.parseInt(scan.readLine());
                         currentPart = (InterfacePart) currentRepository.getPart(code);
-                        break;
-                    case 4:
                         if (currentPart == null) {
-                            System.out.println("Nenhuma peca foi selecionada do repositorio");
+                            System.out.println("Nenhuma peca com o codigo "+ code +" foi encontrado no repositorio atual");
                             break;
                         }
-                        System.out.println("Nome da peca: "+ currentPart.getName());
-                        System.out.println("Descricao: "+ currentPart.getDescription());
-                        System.out.println("Repositorio: "+ currentPart.getRepositoryName());
-                        if (currentPart.isPrimitive()) {
-                             System.out.println("Primitiva: Sim");
-                        } else {
-                            System.out.println("Primitiva: Nao");
-                            System.out.println("Lista de subcomponentes: ");
-                            System.out.printf("\n%-25s %-6s", "Nome", "Quant.");
-                            for (Map.Entry<InterfacePart, Integer> subcomponent : currentPart.getSubComponents().entrySet()) {
-                                System.out.printf("\n%-25s %-6s", subcomponent.getKey().getName(), subcomponent.getValue());
-                            }
-                            System.out.println("\nTotal: "+ currentPart.getTotalSubComponents());
-                        }
+                        showPartDetails(currentPart);
                         break;
                     case 5:
-                        subcomponents.clear();
+                        showPartDetails(currentPart);
                         break;
                     case 6:
                         if (currentPart == null) {
                             System.out.println("Nenhuma peca foi selecionada do repositorio");
                             break;
                         }
-                        System.out.println("Digite a quantidade da peca " + currentPart.getName() + " para adicionar: ");
+                        System.out
+                                .println("Digite a quantidade da peca " + currentPart.getName() + " para adicionar: ");
                         int quant = Integer.parseInt(scan.readLine());
                         subcomponents.put(currentPart, quant);
                         break;
                     case 7:
-                        if (currentRepository == null) {
-                            System.out.println("Nenhum repositorio foi aberto");
-                            break;
-                        }
-                        System.out.println("Coloque o nome da peca: ");
-                        String partName = scan.readLine();
-                        System.out.println("Coloque uma descricao da peca: ");
-                        String partDesc = scan.readLine();
-                        currentRepository.addPart(partName, partDesc, subcomponents);
+                        subcomponents.clear();
                         break;
+                    case 0:
+                        System.out.println("Aplicacao finalizada.");
+                        break;
+                    default:
+                        System.out.println("Opcao invalida");
                 }
             } while (opt != 0);
         } catch (MalformedURLException murle) {
@@ -125,6 +133,32 @@ public class Client {
         } catch (Exception e) {
             System.out.println("Exception");
             System.out.println(e);
+        }
+    }
+
+    public void showPartDetails(InterfacePart part) {
+        if (part == null) {
+            System.out.println("Nenhuma peca foi selecionada do repositorio");
+        } else {
+            try {
+                System.out.println("Nome da peca: " + part.getName());
+                System.out.println("Descricao: " + part.getDescription());
+                System.out.println("Repositorio: " + part.getRepositoryName());
+                if (part.isPrimitive()) {
+                    System.out.println("Primitiva: Sim");
+                } else {
+                    System.out.println("Primitiva: Nao");
+                    System.out.println("Lista de subcomponentes: ");
+                    System.out.printf("\n%-25s %-6s %-15s", "Nome", "Quant.", "Repositorio");
+                    for (Map.Entry<InterfacePart, Integer> subcomponent : part.getSubComponents().entrySet()) {
+                        System.out.printf("\n%-25s %-6s %-15s", subcomponent.getKey().getName(), subcomponent.getValue(), subcomponent.getKey().getRepositoryName());
+                    }
+                    System.out.println("\nTotal: " + part.getTotalSubComponents());
+                }
+            } catch (Exception e) {
+                System.out.println("Error showing part details " + e);
+            }
+
         }
     }
 

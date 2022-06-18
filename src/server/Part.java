@@ -3,18 +3,16 @@ package server;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.RemoteException;
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import interfaces.*;
 
 public class Part extends UnicastRemoteObject implements InterfacePart {
-    private static final AtomicInteger count = new AtomicInteger(0);
     private int code;
     private String name, description, repositoryName;
     private HashMap<InterfacePart, Integer> subcomponents;
 
-    public Part (String name, String desc, HashMap<InterfacePart, Integer> subcomponents, String repName) throws RemoteException {
-        this.code = count.incrementAndGet();
+    public Part (int code, String name, String desc, HashMap<InterfacePart, Integer> subcomponents, String repName) throws RemoteException {
+        this.code = code;
         this.name = name;
         this.description = desc;
         this.subcomponents = new HashMap<InterfacePart, Integer>();

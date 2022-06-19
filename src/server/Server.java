@@ -1,5 +1,6 @@
 package server;
 
+import java.rmi.server.UnicastRemoteObject;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 
@@ -12,11 +13,9 @@ public class Server {
         System.out.println("Iniciando servidor "+ name +"...");
         try {
             int port = Integer.parseInt(strPort);
-            LocateRegistry.createRegistry(port);
-            InterfacePartRepository obj = new PartRepository(name);
-            registry = LocateRegistry.getRegistry(port);
-            registry.bind(name, obj);
-            //Naming.rebind("//localhost:"+ port +"/"+ name, obj);
+            PartRepository obj = new PartRepository(name);
+            registry = LocateRegistry.createRegistry(port);
+            registry.rebind(name, obj);
             System.out.println("Servidor iniciado e rodando!");
         } catch (Exception e) {
             System.out.print("Erro: "+ e);

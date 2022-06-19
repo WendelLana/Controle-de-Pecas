@@ -1,11 +1,12 @@
 package client;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.io.Console;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,7 +14,6 @@ import java.util.HashSet;
 import interfaces.*;
 
 public class Client {
-    private static final AtomicInteger count = new AtomicInteger(0);
     public InterfacePartRepository currentRepository;
     public InterfacePart currentPart;
     public HashMap<InterfacePart, Integer> subcomponents;
@@ -26,6 +26,7 @@ public class Client {
 
     public void init() {
         int opt = 0;
+        String repName = "";
         try {
             do {
                 System.out.println("### Menu do Gerenciador de Pecas ###");
@@ -40,7 +41,7 @@ public class Client {
                 System.out.println("   |   0 - Finalizar aplicacao        |");
                 System.out.println("     ================================");
                 if (currentRepository != null) {
-                    System.out.println("Repositorio atual: " + currentRepository.getRepositoryName());
+                    System.out.println("Repositorio atual: " + repName);
                 }
                 Console scan = System.console();
                 opt = Integer.parseInt(scan.readLine());
@@ -49,15 +50,14 @@ public class Client {
                         System.out.println("Escreva o endereco IP do repositorio (padrao: localhost): ");
                         String repHost = scan.readLine();
                         System.out.println("Escreva a porta do repositorio: ");
-                        String repPort = scan.readLine();
+                        int repPort = Integer.parseInt(scan.readLine());
                         System.out.println("Escreva o nome do repositorio: ");
-                        String repName = scan.readLine();
+                        repName = scan.readLine();
                         if (repHost.isBlank()) {
-                            currentRepository = (InterfacePartRepository) Naming
-                                    .lookup("//localhost:" + repPort + "/" + repName);
+                            currentRepository = (InterfacePartRepository) Naming.lookup("//localhost:" + repPort + "/" + repName);
                         } else {
-                            currentRepository = (InterfacePartRepository) Naming
-                                    .lookup("//" + repHost + ":" + repPort + "/" + repName);
+                            Registry registry = LocateRegistry.getRegistry(repHost, repPort);
+                            currentRepository = (InterfacePartRepository) registry.lookup(repName);
                         }
                         break;
                     case 2:
@@ -65,12 +65,11 @@ public class Client {
                             System.out.println("Nenhum repositorio foi aberto");
                             break;
                         }
-                        int partCode = count.incrementAndGet();
                         System.out.println("Coloque o nome da peca: ");
                         String partName = scan.readLine();
                         System.out.println("Coloque uma descricao da peca: ");
                         String partDesc = scan.readLine();
-                        currentRepository.addPart(partCode, partName, partDesc, subcomponents);
+                        currentRepository.addPart(partName, partDesc, subcomponents);
                         break;
                     case 3:
                         if (currentRepository == null) {
@@ -151,7 +150,7 @@ public class Client {
                     System.out.println("Lista de subcomponentes: ");
                     System.out.printf("\n%-6s %-25s %-6s %-15s", "Cod.", "Nome", "Quant.", "Repositorio");
                     for (Map.Entry<InterfacePart, Integer> subcomponent : part.getSubComponents().entrySet()) {
-                        System.out.printf("\n%-25s %-6s %-15s", subcomponent.getKey().getCode(), subcomponent.getKey().getName(), subcomponent.getValue(), subcomponent.getKey().getRepositoryName());
+                        System.out.printf("\n%-6s %-25s %-6s %-15s", subcomponent.getKey().getCode(), subcomponent.getKey().getName(), subcomponent.getValue(), subcomponent.getKey().getRepositoryName());
                     }
                     System.out.println("\nTotal: " + part.getTotalSubComponents());
                 }

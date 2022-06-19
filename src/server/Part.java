@@ -12,6 +12,7 @@ public class Part extends UnicastRemoteObject implements InterfacePart {
     private HashMap<InterfacePart, Integer> subcomponents;
 
     public Part (int code, String name, String desc, HashMap<InterfacePart, Integer> subcomponents, String repName) throws RemoteException {
+        super();
         this.code = code;
         this.name = name;
         this.description = desc;
